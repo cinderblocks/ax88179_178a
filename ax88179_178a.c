@@ -732,7 +732,6 @@ ax88179_set_features(struct net_device *net, netdev_features_t features)
 
 	return 0;
 }
-#endif
 
 static int ax88179_change_mtu(struct net_device *net, int new_mtu)
 {
