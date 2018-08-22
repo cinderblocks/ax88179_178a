@@ -2243,6 +2243,25 @@ static const struct driver_info ax88178a_info = {
 	.tx_fixup = ax88179_tx_fixup,
 };
 
+static const struct driver_info cypress_GX3_info = {
+	.description = "Cypress GX3 SuperSpeed to Gigabit Ethernet Controller",
+	.bind = ax88179_bind,
+	.unbind = ax88179_unbind,
+	.status = ax88179_status,
+	.link_reset = ax88179_link_reset,
+	.reset = ax88179_reset,
+	.stop = ax88179_stop,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32)
+	.stop	= ax88179_stop,
+	.flags	= FLAG_ETHER | FLAG_FRAMING_AX | FLAG_AVOID_UNLINK_URBS,
+#else
+	.flags	= FLAG_ETHER | FLAG_FRAMING_AX,
+#endif
+	.rx_fixup = ax88179_rx_fixup,
+	.tx_fixup = ax88179_tx_fixup,
+};
+
+
 static const struct driver_info sitecom_info = {
 	.description = "Sitecom USB 3.0 to Gigabit Adapter",
 	.bind	= ax88179_bind,
@@ -2345,6 +2364,23 @@ static const struct driver_info mct_info = {
         .tx_fixup = ax88179_tx_fixup,
 };
 
+static const struct driver_info belkin_info = {
+	.description = "Belkin USB Ethernet Adapter",
+	.bind	= ax88179_bind,
+	.unbind = ax88179_unbind,
+	.status = ax88179_status,
+	.link_reset = ax88179_link_reset,
+	.reset	= ax88179_reset,
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 32)
+        .stop   = ax88179_stop,
+        .flags  = FLAG_ETHER | FLAG_FRAMING_AX | FLAG_AVOID_UNLINK_URBS,
+#else
+        .flags  = FLAG_ETHER | FLAG_FRAMING_AX,
+#endif
+	.rx_fixup = ax88179_rx_fixup,
+	.tx_fixup = ax88179_tx_fixup,
+};
+
 static const struct usb_device_id	products[] = {
 {
 	/* ASIX AX88179 10/100/1000 */
@@ -2355,13 +2391,17 @@ static const struct usb_device_id	products[] = {
 	USB_DEVICE(0x0b95, 0x178a),
 	.driver_info = (unsigned long) &ax88178a_info,
 }, {
+	/* Cypress GX3 SuperSpeed to Gigabit Ethernet Bridge Controller */
+	USB_DEVICE(0x04b4, 0x3610),
+	.driver_info = (unsigned long)&cypress_GX3_info,
+}, {
+	/* D-Link DUB-13x2 USB 3.0 to Gigabit Ethernet Adapter */
+	USB_DEVICE(0x2001, 0x4a00),
+	.driver_info = (unsigned long) &dlink_info,
+}, {
 	/* Sitecom USB 3.0 to Gigabit Adapter */
 	USB_DEVICE(0x0df6, 0x0072),
 	.driver_info = (unsigned long) &sitecom_info,
-}, {
-	/* ThinkPad OneLinkDock USB GigaLAN */
-	USB_DEVICE(0x17ef, 0x304b),
-	.driver_info = (unsigned long) &lenovo_info,
 }, {
 	/* Toshiba USB3.0 to Gigabit LAN Adapter */
 	USB_DEVICE(0x0930, 0x0a13),
@@ -2371,13 +2411,17 @@ static const struct usb_device_id	products[] = {
 	USB_DEVICE(0x04e8, 0xa100),
 	.driver_info = (unsigned long) &samsung_info,
 }, {
-	/* D-Link DUB-13x2 Ethernet Adapter */
-	USB_DEVICE(0x2001, 0x4a00),
-	.driver_info = (unsigned long) &dlink_info,
-}, {
 	/* MCT USB 3.0 to Gigabit Ethernet Adapter */
 	USB_DEVICE(0x0711, 0x0179),
 	.driver_info = (unsigned long) &mct_info,
+}, {
+	/* Lenovo OneLinkDock Gigabit LAN */
+	USB_DEVICE(0x17ef, 0x304b),
+	.driver_info = (unsigned long)&lenovo_info,
+}, {
+	/* Belkin B2B128 USB 3.0 Hub + Gigabit Ethernet Adapter */
+	USB_DEVICE(0x050d, 0x0128),
+	.driver_info = (unsigned long)&belkin_info,
 },
 	{ },		/* END */
 };
@@ -2389,7 +2433,10 @@ static struct usb_driver asix_driver = {
 	.probe =	usbnet_probe,
 	.suspend =	ax88179_suspend,
 	.resume =	ax88179_resume,
+	.reset_resume =	ax88179_resume,
 	.disconnect =	usbnet_disconnect,
+	.supports_autosuspend = 1,
+	.disable_hub_initiated_lpm = 1,
 };
 
 
